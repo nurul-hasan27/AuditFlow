@@ -22,6 +22,11 @@ It centralizes:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
+**Live Deployment:**
+- **Web App**: [https://audit-flow-topaz.vercel.app](https://audit-flow-topaz.vercel.app/)
+- **API Server**: [https://auditflow-api-etbb.onrender.com](https://auditflow-api-etbb.onrender.com/)
+
+
 ---
 
 ## 1. Problem
@@ -457,7 +462,7 @@ AuditFlow comes pre-seeded with accounts for two independent CA firms:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/AuditFlow.git
+git clone https://github.com/nurul-hasan27/AuditFlow.git
 cd AuditFlow
 
 # Install dependencies for both server and client:
