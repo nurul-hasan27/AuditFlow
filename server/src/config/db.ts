@@ -11,7 +11,7 @@ export async function connectDB(): Promise<typeof mongoose> {
 
   let uri = config.mongoUri;
 
-  if (uri === 'memory' || !uri) {
+  if (process.env.NODE_ENV === 'test' || uri === 'memory' || !uri) {
     try {
       console.log('🔄 Initializing in-memory MongoDB instance for local development/testing...');
       mongod = await MongoMemoryServer.create();

@@ -34,8 +34,8 @@ export class StorageService {
     const fileSize = file.size;
     const fileType = file.mimetype;
 
-    // If Cloudinary is configured with actual credentials, upload to Cloudinary
-    if (isCloudinaryConfigured) {
+    // If Cloudinary is configured with actual credentials and not in test mode, upload to Cloudinary
+    if (isCloudinaryConfigured && process.env.NODE_ENV !== 'test') {
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
@@ -56,7 +56,7 @@ export class StorageService {
           }
         );
 
-        uploadStream.end(file.buffer);
+        (uploadStream as any).end(file.buffer);
       });
     }
 
