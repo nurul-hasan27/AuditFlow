@@ -4,6 +4,7 @@ import { AuditAction } from '../types/index.js';
 export interface IAuditEvent extends MongooseDocument {
   firmId: Types.ObjectId;
   clientId?: Types.ObjectId;
+  requirementId?: Types.ObjectId;
   documentId?: Types.ObjectId;
   documentVersionId?: Types.ObjectId;
   actorId: Types.ObjectId;
@@ -24,6 +25,11 @@ const auditEventSchema = new Schema<IAuditEvent>(
     clientId: {
       type: Schema.Types.ObjectId,
       ref: 'Client',
+      index: true,
+    },
+    requirementId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DocumentRequirement',
       index: true,
     },
     documentId: {
@@ -51,6 +57,10 @@ const auditEventSchema = new Schema<IAuditEvent>(
         'DOCUMENT_REUPLOADED',
         'DOCUMENT_APPROVED',
         'USER_LOGIN',
+        'REQUIREMENT_CREATED',
+        'REQUIREMENT_UPDATED',
+        'REQUIREMENT_DEACTIVATED',
+        'REQUIREMENT_REACTIVATED',
       ],
       required: true,
       index: true,

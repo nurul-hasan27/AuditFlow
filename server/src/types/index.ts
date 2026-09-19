@@ -17,7 +17,11 @@ export type AuditAction =
   | 'CORRECTION_REQUESTED'
   | 'DOCUMENT_REUPLOADED'
   | 'DOCUMENT_APPROVED'
-  | 'USER_LOGIN';
+  | 'USER_LOGIN'
+  | 'REQUIREMENT_CREATED'
+  | 'REQUIREMENT_UPDATED'
+  | 'REQUIREMENT_DEACTIVATED'
+  | 'REQUIREMENT_REACTIVATED';
 
 export interface AuthenticatedUserPayload {
   userId: string;

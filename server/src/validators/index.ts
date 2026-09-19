@@ -13,9 +13,25 @@ export const createClientSchema = z.object({
   pan: z.string().optional(),
 });
 
-export const createDocumentRequirementSchema = z.object({
-  title: z.string().min(2, { message: 'Document title is required' }),
-  category: z.string().optional().default('General'),
+export const createRequirementSchema = z.object({
+  name: z
+    .string({ required_error: 'Requirement name is required' })
+    .trim()
+    .min(2, { message: 'Requirement name must be at least 2 characters' })
+    .max(100, { message: 'Requirement name must be at most 100 characters' }),
+  description: z.string().trim().max(500, { message: 'Description cannot exceed 500 characters' }).optional(),
+  category: z.string().trim().optional().default('General'),
+});
+
+export const updateRequirementSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Requirement name must be at least 2 characters' })
+    .max(100, { message: 'Requirement name must be at most 100 characters' })
+    .optional(),
+  description: z.string().trim().max(500, { message: 'Description cannot exceed 500 characters' }).optional(),
+  category: z.string().trim().optional(),
 });
 
 export const requestCorrectionSchema = z.object({

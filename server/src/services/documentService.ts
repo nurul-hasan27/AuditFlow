@@ -48,6 +48,7 @@ export class DocumentService {
       firmId: firmObjectId,
     })
       .populate('clientId', 'name industry financialYear gstin pan')
+      .populate('requirementId', 'name description category isActive')
       .populate('reviewedBy', 'name email role')
       .populate({
         path: 'latestVersionId',
@@ -130,6 +131,7 @@ export class DocumentService {
       firmId: firmObjectId,
       clientId: document.clientId,
       documentId: document._id,
+      requirementId: document.requirementId,
       versionNumber: newVersionNumber,
       fileUrl: storedFile.fileUrl,
       cloudinaryPublicId: storedFile.cloudinaryPublicId,
@@ -157,6 +159,7 @@ export class DocumentService {
       actorId: actorObjectId,
       clientId: document.clientId,
       documentId: document._id,
+      requirementId: document.requirementId,
       documentVersionId: version._id,
       action,
       comment: notes || (isReupload ? `Revision v${newVersionNumber} uploaded` : `Initial upload of ${storedFile.fileName}`),

@@ -4,9 +4,11 @@ import { DocumentStatus } from '../types/index.js';
 export interface IDocument extends MongooseDocument {
   firmId: Types.ObjectId;
   clientId: Types.ObjectId;
+  requirementId?: Types.ObjectId;
   title: string;
   category: string;
   status: DocumentStatus;
+  isActive: boolean;
   currentVersionNumber: number;
   latestVersionId?: Types.ObjectId;
   latestCorrectionComment?: string;
@@ -30,6 +32,11 @@ const documentSchema = new Schema<IDocument>(
       required: true,
       index: true,
     },
+    requirementId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DocumentRequirement',
+      index: true,
+    },
     title: {
       type: String,
       required: true,
@@ -44,6 +51,12 @@ const documentSchema = new Schema<IDocument>(
       type: String,
       enum: ['PENDING', 'UPLOADED', 'UNDER_REVIEW', 'CORRECTION_REQUIRED', 'APPROVED'],
       default: 'PENDING',
+      required: true,
+      index: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
       required: true,
       index: true,
     },

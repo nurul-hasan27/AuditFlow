@@ -108,6 +108,37 @@ export const api = {
   getDocumentAuditHistory: (documentId: string) =>
     request<any[]>(`/documents/${documentId}/audit-history`),
 
+  // Document Requirements
+  getRequirements: (clientId: string, includeInactive?: boolean) => {
+    const query = includeInactive !== undefined ? `?includeInactive=${includeInactive}` : '';
+    return request<any[]>(`/clients/${clientId}/requirements${query}`);
+  },
+
+  createRequirement: (clientId: string, data: { name: string; description?: string; category?: string }) =>
+    request<any>(`/clients/${clientId}/requirements`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateRequirement: (
+    requirementId: string,
+    data: { name?: string; description?: string; category?: string }
+  ) =>
+    request<any>(`/requirements/${requirementId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  deactivateRequirement: (requirementId: string) =>
+    request<any>(`/requirements/${requirementId}/deactivate`, {
+      method: 'PATCH',
+    }),
+
+  activateRequirement: (requirementId: string) =>
+    request<any>(`/requirements/${requirementId}/activate`, {
+      method: 'PATCH',
+    }),
+
   // Review Queue
   getReviewQueue: () => request<any>('/review-queue'),
 

@@ -1,6 +1,14 @@
 import mongoose from 'mongoose';
 import { connectDB } from './db.js';
-import { Firm, User, Client, DocumentModel, DocumentVersion, AuditEvent } from '../models/index.js';
+import {
+  Firm,
+  User,
+  Client,
+  DocumentModel,
+  DocumentVersion,
+  DocumentRequirement,
+  AuditEvent,
+} from '../models/index.js';
 
 export async function seedDatabase() {
   console.log('🌱 Starting AuditFlow database seeding...');
@@ -13,6 +21,7 @@ export async function seedDatabase() {
     Client.deleteMany({}),
     DocumentModel.deleteMany({}),
     DocumentVersion.deleteMany({}),
+    DocumentRequirement.deleteMany({}),
     AuditEvent.deleteMany({}),
   ]);
 
@@ -112,14 +121,66 @@ export async function seedDatabase() {
 
   console.log('📊 Created Demo Clients with Audit Events.');
 
-  // 4. Create Documents for Firm A (ABC Traders Pvt. Ltd.)
+  // 4. Create Document Requirements & Documents for Firm A (ABC Traders Pvt. Ltd.)
+  const reqBankA = await DocumentRequirement.create({
+    firmId: firmA._id,
+    clientId: clientA1._id,
+    name: 'Bank Statement',
+    category: 'Banking',
+    description: 'Annual bank statement for all operational accounts',
+    isActive: true,
+    createdBy: amanReviewerA._id,
+  });
+
+  const reqSalesA = await DocumentRequirement.create({
+    firmId: firmA._id,
+    clientId: clientA1._id,
+    name: 'Sales Register',
+    category: 'Sales & Invoicing',
+    description: 'Monthly sales invoices and tax breakdown',
+    isActive: true,
+    createdBy: amanReviewerA._id,
+  });
+
+  const reqPurchaseA = await DocumentRequirement.create({
+    firmId: firmA._id,
+    clientId: clientA1._id,
+    name: 'Purchase Register',
+    category: 'Procurement & Expenses',
+    description: 'Vendor purchases with GSTR-2B matching',
+    isActive: true,
+    createdBy: amanReviewerA._id,
+  });
+
+  const reqGstA = await DocumentRequirement.create({
+    firmId: firmA._id,
+    clientId: clientA1._id,
+    name: 'GST Return',
+    category: 'Statutory & Tax',
+    description: 'Filed GSTR-3B and GSTR-1 copies',
+    isActive: true,
+    createdBy: amanReviewerA._id,
+  });
+
+  const reqExpenseA = await DocumentRequirement.create({
+    firmId: firmA._id,
+    clientId: clientA1._id,
+    name: 'Expense Summary',
+    category: 'Financial Summary',
+    description: 'Summary of office and operating expenses',
+    isActive: true,
+    createdBy: amanReviewerA._id,
+  });
+
   // Document 1: Bank Statement (APPROVED through 2 versions)
   const docBankStatement = await DocumentModel.create({
     firmId: firmA._id,
     clientId: clientA1._id,
+    requirementId: reqBankA._id,
     title: 'Bank Statement',
     category: 'Banking',
     status: 'APPROVED',
+    isActive: true,
     currentVersionNumber: 2,
     reviewedBy: amanReviewerA._id,
     reviewedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
@@ -130,6 +191,7 @@ export async function seedDatabase() {
     firmId: firmA._id,
     clientId: clientA1._id,
     documentId: docBankStatement._id,
+    requirementId: reqBankA._id,
     versionNumber: 1,
     fileUrl: 'https://res.cloudinary.com/demo/image/upload/v1/samples/sample.pdf',
     fileName: 'Bank_Statement_FY25_Q4_v1.pdf',
@@ -238,9 +300,11 @@ export async function seedDatabase() {
   const docSalesRegister = await DocumentModel.create({
     firmId: firmA._id,
     clientId: clientA1._id,
+    requirementId: reqSalesA._id,
     title: 'Sales Register',
     category: 'Sales & Invoicing',
     status: 'UNDER_REVIEW',
+    isActive: true,
     currentVersionNumber: 1,
   });
 
@@ -248,6 +312,7 @@ export async function seedDatabase() {
     firmId: firmA._id,
     clientId: clientA1._id,
     documentId: docSalesRegister._id,
+    requirementId: reqSalesA._id,
     versionNumber: 1,
     fileUrl: 'https://res.cloudinary.com/demo/image/upload/v1/samples/sample.pdf',
     fileName: 'Sales_Register_2025_26.xlsx',
@@ -267,6 +332,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docSalesRegister._id,
       documentVersionId: docSalesRegisterV1._id,
+      requirementId: reqSalesA._id,
       actorId: rohitStaffA._id,
       action: 'DOCUMENT_UPLOADED',
       comment: 'Uploaded Q4 Sales Register with GST breakup',
@@ -278,6 +344,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docSalesRegister._id,
       documentVersionId: docSalesRegisterV1._id,
+      requirementId: reqSalesA._id,
       actorId: amanReviewerA._id,
       action: 'REVIEW_STARTED',
       comment: 'Cross-checking with tax audit Annexure B',
@@ -290,9 +357,11 @@ export async function seedDatabase() {
   const docPurchaseRegister = await DocumentModel.create({
     firmId: firmA._id,
     clientId: clientA1._id,
+    requirementId: reqPurchaseA._id,
     title: 'Purchase Register',
     category: 'Procurement & Expenses',
     status: 'APPROVED',
+    isActive: true,
     currentVersionNumber: 1,
     reviewedBy: amanReviewerA._id,
     reviewedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -302,6 +371,7 @@ export async function seedDatabase() {
     firmId: firmA._id,
     clientId: clientA1._id,
     documentId: docPurchaseRegister._id,
+    requirementId: reqPurchaseA._id,
     versionNumber: 1,
     fileUrl: 'https://res.cloudinary.com/demo/image/upload/v1/samples/sample.pdf',
     fileName: 'Purchase_Register_FY25.pdf',
@@ -324,6 +394,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docPurchaseRegister._id,
       documentVersionId: docPurchaseRegisterV1._id,
+      requirementId: reqPurchaseA._id,
       actorId: rohitStaffA._id,
       action: 'DOCUMENT_UPLOADED',
       comment: 'Uploaded vendor purchase invoices and register',
@@ -335,6 +406,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docPurchaseRegister._id,
       documentVersionId: docPurchaseRegisterV1._id,
+      requirementId: reqPurchaseA._id,
       actorId: amanReviewerA._id,
       action: 'DOCUMENT_APPROVED',
       comment: 'Verified 2B matching and vendor ITC claims.',
@@ -347,9 +419,11 @@ export async function seedDatabase() {
   const docGstReturn = await DocumentModel.create({
     firmId: firmA._id,
     clientId: clientA1._id,
+    requirementId: reqGstA._id,
     title: 'GST Return',
     category: 'Statutory & Tax',
     status: 'CORRECTION_REQUIRED',
+    isActive: true,
     currentVersionNumber: 1,
     latestCorrectionComment: 'GSTR-3B table 4(A) ITC does not match GSTR-2B summary. Please reconcile and re-upload.',
     reviewedBy: amanReviewerA._id,
@@ -360,6 +434,7 @@ export async function seedDatabase() {
     firmId: firmA._id,
     clientId: clientA1._id,
     documentId: docGstReturn._id,
+    requirementId: reqGstA._id,
     versionNumber: 1,
     fileUrl: 'https://res.cloudinary.com/demo/image/upload/v1/samples/sample.pdf',
     fileName: 'GSTR_3B_March_2025.pdf',
@@ -382,6 +457,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docGstReturn._id,
       documentVersionId: docGstReturnV1._id,
+      requirementId: reqGstA._id,
       actorId: rohitStaffA._id,
       action: 'DOCUMENT_UPLOADED',
       comment: 'Uploaded March 2025 GSTR-3B return copy',
@@ -393,6 +469,7 @@ export async function seedDatabase() {
       clientId: clientA1._id,
       documentId: docGstReturn._id,
       documentVersionId: docGstReturnV1._id,
+      requirementId: reqGstA._id,
       actorId: amanReviewerA._id,
       action: 'CORRECTION_REQUESTED',
       comment: 'GSTR-3B table 4(A) ITC does not match GSTR-2B summary. Please reconcile and re-upload.',
@@ -405,19 +482,74 @@ export async function seedDatabase() {
   await DocumentModel.create({
     firmId: firmA._id,
     clientId: clientA1._id,
+    requirementId: reqExpenseA._id,
     title: 'Expense Summary',
     category: 'Financial Summary',
     status: 'PENDING',
+    isActive: true,
     currentVersionNumber: 0,
   });
 
-  // 5. Create Documents for Firm B (XYZ Manufacturing Pvt. Ltd.)
+  // 5. Create Document Requirements & Documents for Firm B (XYZ Manufacturing Pvt. Ltd.)
+  // As required: Bank Statement, GST Return, TDS Certificate, Inventory Report, Expense Summary
+  const reqBankB = await DocumentRequirement.create({
+    firmId: firmB._id,
+    clientId: clientB1._id,
+    name: 'Bank Statement',
+    category: 'Banking',
+    description: 'Primary CC and current accounts annual statement',
+    isActive: true,
+    createdBy: priyaReviewerB._id,
+  });
+
+  const reqGstB = await DocumentRequirement.create({
+    firmId: firmB._id,
+    clientId: clientB1._id,
+    name: 'GST Return',
+    category: 'Statutory & Tax',
+    description: 'Monthly GSTR-3B and GSTR-1 filings',
+    isActive: true,
+    createdBy: priyaReviewerB._id,
+  });
+
+  const reqTdsB = await DocumentRequirement.create({
+    firmId: firmB._id,
+    clientId: clientB1._id,
+    name: 'TDS Certificate',
+    category: 'Taxation & Deductions',
+    description: 'Form 16A and Form 26AS matching report',
+    isActive: true,
+    createdBy: priyaReviewerB._id,
+  });
+
+  const reqInventoryB = await DocumentRequirement.create({
+    firmId: firmB._id,
+    clientId: clientB1._id,
+    name: 'Inventory Report',
+    category: 'Stock & Inventory',
+    description: 'Year-end physical inventory valuation statement',
+    isActive: true,
+    createdBy: priyaReviewerB._id,
+  });
+
+  const reqExpenseB = await DocumentRequirement.create({
+    firmId: firmB._id,
+    clientId: clientB1._id,
+    name: 'Expense Summary',
+    category: 'Financial Summary',
+    description: 'Manufacturing direct & indirect overhead expenses',
+    isActive: true,
+    createdBy: priyaReviewerB._id,
+  });
+
   const docBankStatementB = await DocumentModel.create({
     firmId: firmB._id,
     clientId: clientB1._id,
+    requirementId: reqBankB._id,
     title: 'Bank Statement',
     category: 'Banking',
     status: 'UNDER_REVIEW',
+    isActive: true,
     currentVersionNumber: 1,
   });
 
@@ -425,6 +557,7 @@ export async function seedDatabase() {
     firmId: firmB._id,
     clientId: clientB1._id,
     documentId: docBankStatementB._id,
+    requirementId: reqBankB._id,
     versionNumber: 1,
     fileUrl: 'https://res.cloudinary.com/demo/image/upload/v1/samples/sample.pdf',
     fileName: 'HDFC_Bank_Statement_XYZ.pdf',
@@ -444,6 +577,7 @@ export async function seedDatabase() {
       clientId: clientB1._id,
       documentId: docBankStatementB._id,
       documentVersionId: docBankStatementBV1._id,
+      requirementId: reqBankB._id,
       actorId: rajStaffB._id,
       action: 'DOCUMENT_UPLOADED',
       comment: 'Uploaded annual statement for HDFC primary CC account',
@@ -455,6 +589,7 @@ export async function seedDatabase() {
       clientId: clientB1._id,
       documentId: docBankStatementB._id,
       documentVersionId: docBankStatementBV1._id,
+      requirementId: reqBankB._id,
       actorId: priyaReviewerB._id,
       action: 'REVIEW_STARTED',
       comment: 'Beginning verification of interest and charges',
@@ -463,38 +598,46 @@ export async function seedDatabase() {
     },
   ]);
 
-  // Other pending documents for Firm B
+  // Other pending documents for Firm B (GST Return, TDS Certificate, Inventory Report, Expense Summary)
   await DocumentModel.create([
     {
       firmId: firmB._id,
       clientId: clientB1._id,
-      title: 'Sales Register',
-      category: 'Sales & Invoicing',
-      status: 'PENDING',
-      currentVersionNumber: 0,
-    },
-    {
-      firmId: firmB._id,
-      clientId: clientB1._id,
-      title: 'Purchase Register',
-      category: 'Procurement & Expenses',
-      status: 'PENDING',
-      currentVersionNumber: 0,
-    },
-    {
-      firmId: firmB._id,
-      clientId: clientB1._id,
+      requirementId: reqGstB._id,
       title: 'GST Return',
       category: 'Statutory & Tax',
       status: 'PENDING',
+      isActive: true,
       currentVersionNumber: 0,
     },
     {
       firmId: firmB._id,
       clientId: clientB1._id,
+      requirementId: reqTdsB._id,
+      title: 'TDS Certificate',
+      category: 'Taxation & Deductions',
+      status: 'PENDING',
+      isActive: true,
+      currentVersionNumber: 0,
+    },
+    {
+      firmId: firmB._id,
+      clientId: clientB1._id,
+      requirementId: reqInventoryB._id,
+      title: 'Inventory Report',
+      category: 'Stock & Inventory',
+      status: 'PENDING',
+      isActive: true,
+      currentVersionNumber: 0,
+    },
+    {
+      firmId: firmB._id,
+      clientId: clientB1._id,
+      requirementId: reqExpenseB._id,
       title: 'Expense Summary',
       category: 'Financial Summary',
       status: 'PENDING',
+      isActive: true,
       currentVersionNumber: 0,
     },
   ]);

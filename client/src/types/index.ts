@@ -14,7 +14,11 @@ export type AuditAction =
   | 'CORRECTION_REQUESTED'
   | 'DOCUMENT_REUPLOADED'
   | 'DOCUMENT_APPROVED'
-  | 'USER_LOGIN';
+  | 'USER_LOGIN'
+  | 'REQUIREMENT_CREATED'
+  | 'REQUIREMENT_UPDATED'
+  | 'REQUIREMENT_DEACTIVATED'
+  | 'REQUIREMENT_REACTIVATED';
 
 export interface Firm {
   id: string;
@@ -28,6 +32,25 @@ export interface User {
   email: string;
   role: UserRole;
   firm: Firm;
+}
+
+export interface DocumentRequirement {
+  id: string;
+  firmId: string;
+  clientId: string;
+  name: string;
+  description?: string;
+  category?: string;
+  isActive: boolean;
+  createdBy?: {
+    id: string;
+    name: string;
+    email?: string;
+    role?: UserRole;
+  };
+  document?: DocumentItem | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ClientSummary {
@@ -48,6 +71,8 @@ export interface ClientSummary {
   };
   lastActivityAt: string;
   createdAt: string;
+  documents?: DocumentItem[];
+  requirements?: DocumentRequirement[];
 }
 
 export interface DocumentVersionItem {
@@ -76,12 +101,14 @@ export interface DocumentVersionItem {
 export interface DocumentItem {
   id: string;
   clientId: string | { _id: string; name: string; industry?: string };
+  requirementId?: string;
   title: string;
   category: string;
   status: DocumentStatus;
   currentVersionNumber: number;
   latestVersionId?: DocumentVersionItem;
   latestCorrectionComment?: string;
+  isActive?: boolean;
   reviewedBy?: {
     id: string;
     name: string;
@@ -98,6 +125,7 @@ export interface AuditTimelineEvent {
   action: AuditAction;
   comment?: string;
   metadata?: Record<string, any>;
+  requirementId?: string;
   createdAt: string;
   actor: {
     id: string;
@@ -113,6 +141,7 @@ export interface ActivityFeedItem {
   action: AuditAction;
   comment?: string;
   metadata?: Record<string, any>;
+  requirementId?: string;
   createdAt: string;
   actor: {
     id: string;

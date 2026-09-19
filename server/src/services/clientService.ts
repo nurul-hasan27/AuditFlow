@@ -1,9 +1,11 @@
 import { Types } from 'mongoose';
 import { Client, IClient } from '../models/Client.js';
 import { DocumentModel } from '../models/Document.js';
+import { DocumentRequirement } from '../models/DocumentRequirement.js';
 import { AuditEvent } from '../models/AuditEvent.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { auditService } from './auditService.js';
+import { requirementService } from './requirementService.js';
 
 const STANDARD_DOCUMENT_CHECKLIST = [
   { title: 'Bank Statement', category: 'Banking' },
@@ -27,9 +29,11 @@ export class ClientService {
 
     const clientSummaries = await Promise.all(
       clients.map(async (client) => {
+        // Only active requirements count toward current audit workload & completion
         const documents = await DocumentModel.find({
           firmId: firmObjectId,
           clientId: client._id,
+          isActive: { $ne: false },
         }).lean();
 
         const totalDocs = documents.length;
@@ -90,13 +94,22 @@ export class ClientService {
       throw new AppError('Client not found or inaccessible', 404);
     }
 
+    // Fetch active documents for active checklist
     const documents = await DocumentModel.find({
       firmId: firmObjectId,
       clientId: client._id,
+      isActive: { $ne: false },
     })
       .populate('reviewedBy', 'name email role')
       .sort({ createdAt: 1 })
       .lean();
+
+    // Fetch requirements (including inactive for reviewer controls)
+    const requirements = await requirementService.getRequirementsForClient(
+      firmId,
+      clientId,
+      true
+    );
 
     const stats = {
       total: documents.length,
@@ -115,11 +128,12 @@ export class ClientService {
         ...doc,
         id: doc._id,
       })),
+      requirements,
     };
   }
 
   /**
-   * Creates a new client and initializes their standard audit document checklist.
+   * Creates a new client and initializes their standard audit document requirements.
    */
   async createClient(
     firmId: string,
@@ -145,19 +159,28 @@ export class ClientService {
       assignedStaffId: actorObjectId,
     });
 
-    // Initialize the standard 5 audit document requirements
-    await Promise.all(
-      STANDARD_DOCUMENT_CHECKLIST.map((item) =>
-        DocumentModel.create({
-          firmId: firmObjectId,
-          clientId: client._id,
-          title: item.title,
-          category: item.category,
-          status: 'PENDING',
-          currentVersionNumber: 0,
-        })
-      )
-    );
+    // Initialize the standard audit document requirements as database models
+    for (const item of STANDARD_DOCUMENT_CHECKLIST) {
+      const requirement = await DocumentRequirement.create({
+        firmId: firmObjectId,
+        clientId: client._id,
+        name: item.title,
+        category: item.category,
+        isActive: true,
+        createdBy: actorObjectId,
+      });
+
+      await DocumentModel.create({
+        firmId: firmObjectId,
+        clientId: client._id,
+        requirementId: requirement._id,
+        title: item.title,
+        category: item.category,
+        status: 'PENDING',
+        currentVersionNumber: 0,
+        isActive: true,
+      });
+    }
 
     // Record audit event
     await auditService.record({
@@ -165,7 +188,7 @@ export class ClientService {
       actorId: actorObjectId,
       clientId: client._id,
       action: 'CLIENT_CREATED',
-      comment: `Client engagement '${client.name}' created with standard audit document checklist`,
+      comment: `Client engagement '${client.name}' created with audit document requirements`,
       metadata: { clientName: client.name, financialYear: client.financialYear },
     });
 

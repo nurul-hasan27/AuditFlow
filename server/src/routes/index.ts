@@ -4,6 +4,7 @@ import clientRoutes from './clientRoutes.js';
 import documentRoutes from './documentRoutes.js';
 import reviewQueueRoutes from './reviewQueueRoutes.js';
 import activityRoutes from './activityRoutes.js';
+import requirementRoutes from './requirementRoutes.js';
 
 const apiRouter = Router();
 
@@ -19,6 +20,7 @@ apiRouter.get('/health', (_req, res) => {
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/clients', clientRoutes);
 apiRouter.use('/documents', documentRoutes);
+apiRouter.use('/requirements', requirementRoutes);
 apiRouter.use('/review-queue', reviewQueueRoutes);
 apiRouter.use('/activity', activityRoutes);
 

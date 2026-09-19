@@ -20,7 +20,7 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
   10. Entire lifecycle is documented step-by-step in the visual **Audit Timeline**.
 
 ### What Was Tested:
-- Verified through automated end-to-end integration tests (`server/tests/api.test.ts`) using Supertest.
+- Verified through automated end-to-end integration tests (`server/tests/api.test.ts`, `server/tests/requirements.test.ts`, `client/tests/requirements_ui.test.tsx`).
 - Tests assert:
   - Initial upload advances state to `UPLOADED` with `versionNumber: 1`.
   - Reviewer starts review advancing state to `UNDER_REVIEW`.
@@ -29,6 +29,10 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
   - Re-upload creates `versionNumber: 2` with `DOCUMENT_REUPLOADED` audit event.
   - Reviewer approval transitions to `APPROVED` with `DOCUMENT_APPROVED` audit event.
   - Terminal state validation: Documents in `APPROVED` reject illegal uploads or re-approvals.
+  - Dynamic requirements: Reviewer can add, rename, deactivate, and reactivate client-specific requirements.
+  - RBAC: Staff mutation attempts return HTTP `403 Forbidden`.
+  - Multi-tenancy: Firm A cannot access or mutate Firm B requirements (`404 Not Found`).
+  - Historical safety: Deactivated requirements retain files, versions, and audit history (`isActive: false`).
 
 ### Known Limitations / What Could Improve:
 - Currently, version comparison in the UI allows opening both versions in separate tabs or downloading them, but does not provide a side-by-side visual PDF diff (which would require heavy third-party rendering libraries out of scope for MVP).
@@ -41,6 +45,10 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
 - **Centralized Service Enforcement**: Audit events are generated strictly inside business services (`auditService.record(...)`).
 - Events are triggered automatically as part of atomic operations:
   - `CLIENT_CREATED` on client initialization.
+  - `REQUIREMENT_CREATED` when a reviewer adds a client-specific document requirement.
+  - `REQUIREMENT_UPDATED` when a requirement is renamed or instructions updated.
+  - `REQUIREMENT_DEACTIVATED` when a requirement is soft-deactivated.
+  - `REQUIREMENT_REACTIVATED` when a deactivated requirement is restored.
   - `DOCUMENT_UPLOADED` on initial file upload.
   - `REVIEW_STARTED` when a reviewer claims a document.
   - `CORRECTION_REQUESTED` when a reviewer flags issues (capturing the reviewer's mandatory feedback).
@@ -51,10 +59,10 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
   1. *Who?* (actorId, populated with name, email, role).
   2. *What?* (action enum).
   3. *When?* (server-derived `createdAt` timestamp).
-  4. *Which Document?* (`documentId`).
+  4. *Which Document / Requirement?* (`documentId`, `requirementId`).
   5. *Which Client?* (`clientId`).
   6. *Which Firm?* (`firmId`).
-  7. *What Reason/Comment?* (mandatory comment on correction, audit notes on approval/upload).
+  7. *What Reason/Comment?* (mandatory comment on correction, audit notes on approval/upload/requirement modification).
 
 ### How Immutability Is Handled:
 - **Append-Only Schema**: In `AuditEvent.ts`, Mongoose is configured with `{ timestamps: { createdAt: true, updatedAt: false } }`.
@@ -73,14 +81,16 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
   - `Firm`: Tenant root with unique uppercase `code`.
   - `User`: Belongs to `firmId`, indexed on `firmId` and unique `email`.
   - `Client`: Belongs to `firmId`, indexed compound `{ firmId: 1, name: 1 }`.
-  - `Document`: Represents the statutory checklist item (e.g., Bank Statement). References `firmId`, `clientId`, and `latestVersionId`.
-  - `DocumentVersion`: Preserves immutable file history. Contains `versionNumber`, `fileUrl`, `fileName`, `fileSize`, `fileType`, `uploadedBy`, `reviewStatus`, `reviewComment`.
-  - `AuditEvent`: Append-only compliance log. References `firmId`, `clientId`, `documentId`, `documentVersionId`, `actorId`.
+  - `DocumentRequirement`: Configurable statutory requirement belonging to a client. References `firmId`, `clientId`, `createdBy`, with compound index `{ firmId: 1, clientId: 1, name: 1 }` and `isActive` flag.
+  - `Document`: Represents the document state container. References `firmId`, `clientId`, `requirementId`, and `latestVersionId`, with `isActive` flag synced with its requirement.
+  - `DocumentVersion`: Preserves immutable file history. Contains `requirementId`, `versionNumber`, `fileUrl`, `fileName`, `fileSize`, `fileType`, `uploadedBy`, `reviewStatus`, `reviewComment`.
+  - `AuditEvent`: Append-only compliance log. References `firmId`, `clientId`, `requirementId`, `documentId`, `documentVersionId`, `actorId`.
 - **Separation of Concerns**:
-  - The document requirement (the checklist item) is decoupled from the document version. This cleanly allows multi-version histories without data duplication.
+  - The client requirement definition (`DocumentRequirement`) is cleanly decoupled from document lifecycle state (`Document`) and immutable version storage (`DocumentVersion`).
+  - Deactivating a requirement updates `isActive: false` across requirement and document without destroying any uploaded versions or historical logs.
 - **Clean Service Layer**:
   - Controllers remain thin (parameter extraction and HTTP status codes).
-  - Business logic is encapsulated in `authService`, `clientService`, `documentService`, `reviewQueueService`, and `auditService`.
+  - Business logic is encapsulated in `authService`, `clientService`, `requirementService`, `documentService`, `reviewQueueService`, and `auditService`.
 
 ---
 
@@ -120,7 +130,7 @@ This document provides a candid, technical self-evaluation of AuditFlow against 
 - Centralized error handling middleware with sanitized API error responses.
 
 ### What Could Still Improve:
-- E2E browser tests (Playwright or Cypress) could complement the existing 25 Vitest/Supertest tests.
+- E2E browser tests (Playwright or Cypress) could complement the existing 38 Vitest/Supertest backend and component tests.
 
 ---
 

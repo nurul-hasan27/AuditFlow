@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '../lib/utils.js';
 
 type ToastType = 'success' | 'error' | 'info';
@@ -28,7 +28,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
     setTimeout(() => {
       removeToast(id);
-    }, 4500);
+    }, 4000);
   };
 
   const removeToast = (id: string) => {
@@ -46,26 +46,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     >
       {children}
       {/* Toast Render Container */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none">
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}
             className={cn(
-              'pointer-events-auto flex items-start gap-3 p-3.5 rounded-lg shadow-lg border text-sm transition-all transform translate-y-0',
-              t.type === 'success' && 'bg-emerald-50 border-emerald-200 text-emerald-900',
-              t.type === 'error' && 'bg-rose-50 border-rose-200 text-rose-900',
+              'pointer-events-auto flex items-center gap-3 py-2.5 px-3.5 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] border text-xs font-medium transition-all duration-200 transform translate-y-0',
+              t.type === 'success' && 'bg-white border-slate-200/90 text-slate-800',
+              t.type === 'error' && 'bg-white border-rose-200 text-rose-900',
               t.type === 'info' && 'bg-slate-900 border-slate-800 text-white'
             )}
           >
-            {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
-            {t.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
-            {t.type === 'info' && <Info className="w-5 h-5 text-slate-300 shrink-0 mt-0.5" />}
-            <div className="flex-1 font-medium">{t.message}</div>
+            {t.type === 'success' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            )}
+            {t.type === 'error' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+            )}
+            {t.type === 'info' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+            )}
+            <div className="flex-1 leading-snug">{t.message}</div>
             <button
               onClick={() => removeToast(t.id)}
-              className="text-slate-400 hover:text-slate-600 shrink-0 p-0.5"
+              className="text-slate-400 hover:text-slate-600 shrink-0 p-1 -mr-1 rounded-md transition-colors"
+              aria-label="Dismiss notification"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}

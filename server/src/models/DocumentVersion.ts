@@ -5,6 +5,7 @@ export interface IDocumentVersion extends MongooseDocument {
   firmId: Types.ObjectId;
   clientId: Types.ObjectId;
   documentId: Types.ObjectId;
+  requirementId?: Types.ObjectId;
   versionNumber: number;
   fileUrl: string;
   cloudinaryPublicId?: string;
@@ -38,6 +39,11 @@ const documentVersionSchema = new Schema<IDocumentVersion>(
       type: Schema.Types.ObjectId,
       ref: 'Document',
       required: true,
+      index: true,
+    },
+    requirementId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DocumentRequirement',
       index: true,
     },
     versionNumber: {

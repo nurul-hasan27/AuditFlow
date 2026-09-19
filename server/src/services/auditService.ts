@@ -7,6 +7,7 @@ export interface RecordAuditParams {
   actorId: string | Types.ObjectId;
   action: AuditAction;
   clientId?: string | Types.ObjectId;
+  requirementId?: string | Types.ObjectId;
   documentId?: string | Types.ObjectId;
   documentVersionId?: string | Types.ObjectId;
   comment?: string;
@@ -24,6 +25,9 @@ export class AuditService {
       actorId: new Types.ObjectId(params.actorId.toString()),
       action: params.action,
       clientId: params.clientId ? new Types.ObjectId(params.clientId.toString()) : undefined,
+      requirementId: params.requirementId
+        ? new Types.ObjectId(params.requirementId.toString())
+        : undefined,
       documentId: params.documentId ? new Types.ObjectId(params.documentId.toString()) : undefined,
       documentVersionId: params.documentVersionId
         ? new Types.ObjectId(params.documentVersionId.toString())

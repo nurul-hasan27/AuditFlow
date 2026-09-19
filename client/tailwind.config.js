@@ -13,54 +13,54 @@ export default {
           foreground: '#ffffff',
           50: '#f8fafc',
           100: '#f1f5f9',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+          500: '#2563eb',
+          600: '#1d4ed8',
+          700: '#1e40af',
         },
-        brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
+        surface: {
+          DEFAULT: '#ffffff',
+          subtle: '#f8fafc',
+          muted: '#f1f5f9',
+          border: '#e2e8f0',
         },
-        audit: {
-          pending: {
-            bg: '#f1f5f9',
-            text: '#475569',
-            border: '#cbd5e1'
-          },
-          uploaded: {
-            bg: '#eff6ff',
-            text: '#1d4ed8',
-            border: '#bfdbfe'
-          },
-          underReview: {
-            bg: '#fefce8',
-            text: '#a16207',
-            border: '#fef08a'
-          },
-          correctionRequired: {
-            bg: '#fef2f2',
-            text: '#b91c1c',
-            border: '#fecaca'
-          },
-          approved: {
-            bg: '#f0fdf4',
-            text: '#15803d',
-            border: '#bbf7d0'
-          }
-        }
       },
       fontFamily: {
+        serif: ['"PT Serif"', 'Georgia', 'Cambria', '"Times New Roman"', 'serif'],
         sans: [
-          'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
-          'Segoe UI',
+          '"SF Pro Text"',
+          '"SF Pro Display"',
+          '"SF Pro"',
+          '"Segoe UI"',
           'Roboto',
+          'Helvetica',
+          'Arial',
           'sans-serif',
         ],
+        mono: [
+          '"SF Mono"',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          '"Liberation Mono"',
+          '"Courier New"',
+          'monospace',
+        ],
+      },
+      boxShadow: {
+        'xs': '0 1px 2px rgba(0, 0, 0, 0.03)',
+        'subtle': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+        'popover': '0 4px 12px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
+      },
+      borderRadius: {
+        'subtle': '6px',
+        'btn': '8px',
+        'card': '12px',
+        'card-lg': '14px',
+        'dialog': '16px',
       },
     },
   },

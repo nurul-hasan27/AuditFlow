@@ -13,9 +13,10 @@ export class ReviewQueueService {
   async getQueue(firmId: string) {
     const firmObjectId = new Types.ObjectId(firmId);
 
-    // Fetch documents that have active versions
+    // Fetch documents that have active versions and are part of active requirements
     const documents = await DocumentModel.find({
       firmId: firmObjectId,
+      isActive: { $ne: false },
       status: { $in: ['UPLOADED', 'UNDER_REVIEW', 'CORRECTION_REQUIRED', 'APPROVED'] },
     })
       .populate('clientId', 'name industry financialYear')
