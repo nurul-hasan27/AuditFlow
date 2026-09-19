@@ -1,0 +1,28 @@
+{
+  "name": "auditflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AuditFlow - Audit document review, without the scattered workflow",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "dev": "npm --prefix server run dev & npm --prefix client run dev",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "build": "npm run build:server && npm run build:client",
+    "seed": "npm --prefix server run seed",
+    "test:server": "npm --prefix server run test",
+    "test:client": "npm --prefix client run test",
+    "test": "npm run test:server && npm run test:client"
+  },
+  "keywords": [
+    "audit",
+    "multi-tenant",
+    "ca-firms",
+    "document-review",
+    "compliance"
+  ],
+  "author": "",
+  "license": "ISC"
+}
