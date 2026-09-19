@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import { config } from './env.js';
 
-let mongod: MongoMemoryServer | null = null;
+let mongod: any = null;
 
 export async function connectDB(): Promise<typeof mongoose> {
   if (mongoose.connection.readyState >= 1) {
@@ -14,6 +13,7 @@ export async function connectDB(): Promise<typeof mongoose> {
   if (process.env.NODE_ENV === 'test' || uri === 'memory' || !uri) {
     try {
       console.log('🔄 Initializing in-memory MongoDB instance for local development/testing...');
+      const { MongoMemoryServer } = await import('mongodb-memory-server');
       mongod = await MongoMemoryServer.create();
       uri = mongod.getUri();
       console.log('✅ In-memory MongoDB started at:', uri);
